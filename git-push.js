@@ -10,8 +10,8 @@ try {
   const fs = require('fs');
   const readmePath = path.join(repoPath, 'README.md');
   let content = fs.readFileSync(readmePath, 'utf8');
-  if (!content.startsWith('# Tindahan')) {
-    content = '# Tindahan\n' + content;
+  if (!content.startsWith('# TindahanNiTeteng')) {
+    content = '# TindahanNiTeteng\n' + content;
     fs.writeFileSync(readmePath, content);
   }
   
@@ -20,7 +20,7 @@ try {
   execSync('git add README.md', { stdio: 'inherit' });
   execSync('git commit -m "first commit"', { stdio: 'inherit' });
   execSync('git branch -M main', { stdio: 'inherit' });
-  execSync('git remote add origin https://github.com/strwt/Tindahan.git', { stdio: 'inherit' });
+  execSync('git remote add origin https://github.com/strwt/TindahanNiTeteng.git', { stdio: 'inherit' });
   execSync('git push -u origin main', { stdio: 'inherit' });
   
   console.log('Successfully pushed to GitHub!');
