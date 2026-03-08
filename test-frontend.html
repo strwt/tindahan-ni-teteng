@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend Sync</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Sync Test</h1>
+    <div id="output"></div>
+    <script type="module">
+        const output = document.getElementById('output');
+        
+        function log(msg, type = 'info') {
+            const p = document.createElement('p');
+            p.className = type;
+            p.textContent = msg;
+            output.appendChild(p);
+            console.log(msg);
+        }
+
+        async function test() {
+            try {
+                log('Testing backend at http://localhost:4000...');
+                
+                // Test 1: Health check
+                log('1. Testing health endpoint...');
+                const healthRes = await fetch('http://localhost:4000/health');
+                const healthData = await healthRes.json();
+                log('   Health: ' + JSON.stringify(healthData), healthData.ok ? 'success' : 'error');
+                
+                if (!healthData.ok || !healthData.supabaseConfigured) {
+                    log('ERROR: Backend not properly configured!', 'error');
+                    return;
+                }
+                
+                // Test 2: Get collections
+                log('2. Testing collections endpoint...');
+                const collRes = await fetch('http://localhost:4000/api/collections');
+                const collData = await collRes.json();
+                log('   Collections: ' + collData.items.map(i => `${i.name}:${i.data.length}`).join(', '));
+                
+                // Test 3: Push test data
+                log('3. Testing sync endpoint...');
+                const testData = {
+                    taxiRentRecords: [{
+                        id: Date.now(),
+                        roomName: 'Test Taxi',
+                        renterName: 'Test Driver',
+                        date: new Date().toISOString().split('T')[0],
+                        period: 'daily',
+                        rentAmount: 500,
+                        paidAmount: 0,
+                        excepted: false,
+                        exceptNote: '',
+                        paymentHistory: []
+                    }]
+                };
+                
+                const syncRes = await fetch('http://localhost:4000/api/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                const syncData = await syncRes.json();
+                log('   Sync result: ' + JSON.stringify(syncData), syncData.synced ? 'success' : 'error');
+                
+                // Test 4: Verify data was saved
+                log('4. Verifying data was saved...');
+                const verifyRes = await fetch('http://localhost:4000/api/collections/taxiRentRecords');
+                const verifyData = await verifyRes.json();
+                log('   Records in DB: ' + verifyData.data.length);
+                
+                if (verifyData.data.length > 0) {
+                    log('SUCCESS: Frontend can reach backend and save data!', 'success');
+                }
+                
+            } catch (error) {
+                log('ERROR: ' + error.message, 'error');
+                log('This means the frontend cannot reach the backend.', 'error');
+            }
+        }
+        
+        test();
+    </script>
+</body>
+</html>
+

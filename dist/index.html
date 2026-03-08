@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rent Money and Sari-Sari Store</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    
+  <script type="module" crossorigin src="/assets/index.a54e2c36.js"></script>
+  <link rel="stylesheet" href="/assets/index.a055d541.css">
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="confirm-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-sm w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-red-500"></div>
+                <div class="p-6">
+                <div class="flex items-start gap-4 mb-5">
+                    <div class="w-11 h-11 rounded-2xl bg-red-100 flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div class="pt-0.5">
+                        <h3 id="confirm-title" class="text-base font-semibold text-slate-800">Delete Record</h3>
+                        <p id="confirm-message" class="text-slate-500 text-sm mt-1 leading-relaxed">This action cannot be undone.</p>
+                    </div>
+                </div>
+                <div class="flex gap-2.5 justify-end pt-1">
+                    <button id="confirm-no" class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                        Cancel
+                    </button>
+                    <button id="confirm-yes" class="px-5 py-2.5 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors shadow-sm">
+                        Delete
+                    </button>
+                </div>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <div id="room-pay-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="room-pay-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-3xl w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-blue-500"></div>
+                <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800">Record Room Rent Payment</h3>
+                    </div>
+                    <button id="room-pay-close" type="button" class="modal-close-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="room-pay-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Record</label>
+                        <select id="room-pay-record" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="">Select renter record</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Payment Date</label>
+                        <input type="date" id="room-pay-date" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount Paid (PHP)</label>
+                        <input type="number" id="room-pay-amount" required min="0.01" step="0.01" placeholder="0.00" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Note</label>
+                        <input type="text" id="room-pay-note" placeholder="Optional note" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm">Record Payment</button>
+                    </div>
+                </form>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <div id="room-edit-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="room-edit-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-blue-500"></div>
+                <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800">Edit Room Rent Record</h3>
+                    </div>
+                    <button id="room-edit-close" type="button" class="modal-close-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="room-manage-edit-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Record</label>
+                        <select id="room-manage-edit-record" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="">Select renter record</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Room</label>
+                        <input type="text" id="room-manage-room" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Renter</label>
+                        <input type="text" id="room-manage-renter" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                        <input type="date" id="room-manage-date" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Cycle</label>
+                        <select id="room-manage-period" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Rent (PHP)</label>
+                        <input type="number" id="room-manage-rent" required min="0.01" step="0.01" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Paid (PHP)</label>
+                        <input type="number" id="room-manage-paid" required min="0" step="0.01" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm">Save Edit</button>
+                    </div>
+                </form>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Taxi Pay Modal -->
+    <div id="taxi-pay-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="taxi-pay-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-3xl w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-blue-500"></div>
+                <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800">Record Taxi Payment</h3>
+                    </div>
+                    <button id="taxi-pay-close" type="button" class="modal-close-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="taxi-pay-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Record</label>
+                        <select id="taxi-pay-record" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="">Select driver record</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Payment Date</label>
+                        <input type="date" id="taxi-pay-date" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount Paid (PHP)</label>
+                        <input type="number" id="taxi-pay-amount" required min="0.01" step="0.01" placeholder="0.00" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Note</label>
+                        <input type="text" id="taxi-pay-note" placeholder="Optional note" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm">Record Payment</button>
+                    </div>
+                </form>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Taxi Edit Modal -->
+    <div id="taxi-edit-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="taxi-edit-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-blue-500"></div>
+                <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800">Edit Taxi Rent Record</h3>
+                    </div>
+                    <button id="taxi-edit-close" type="button" class="modal-close-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="taxi-manage-edit-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Record</label>
+                        <select id="taxi-manage-edit-record" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="">Select driver record</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Taxi No.</label>
+                        <input type="text" id="taxi-manage-room" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Driver</label>
+                        <input type="text" id="taxi-manage-renter" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                        <input type="date" id="taxi-manage-date" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Cycle</label>
+                        <select id="taxi-manage-period" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Rent (PHP)</label>
+                        <input type="number" id="taxi-manage-rent" required min="0.01" step="0.01" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div class="flex items-end lg:col-span-6">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm">Save Edit</button>
+                    </div>
+                </form>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Borrow Pay Modal -->
+    <div id="borrow-pay-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="borrow-pay-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-3xl w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-emerald-500"></div>
+                <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800">Record Borrower Payment</h3>
+                    </div>
+                    <button id="borrow-pay-close" type="button" class="modal-close-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="borrow-pay-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Record</label>
+                        <select id="borrow-pay-record" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="">Select borrower record</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Payment Date</label>
+                        <input type="date" id="borrow-pay-date" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount Paid (PHP)</label>
+                        <input type="number" id="borrow-pay-amount" required min="0.01" step="0.01" placeholder="0.00" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Note</label>
+                        <input type="text" id="borrow-pay-note" placeholder="Optional note" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm">Record Payment</button>
+                    </div>
+                </form>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Borrow Edit Modal -->
+    <div id="borrow-edit-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="borrow-edit-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-emerald-500"></div>
+                <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800">Edit Borrow Record</h3>
+                    </div>
+                    <button id="borrow-edit-close" type="button" class="modal-close-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="borrow-manage-edit-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Record</label>
+                        <select id="borrow-manage-edit-record" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="">Select borrower record</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Name</label>
+                        <input type="text" id="borrow-manage-borrower" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                        <input type="date" id="borrow-manage-date" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount (PHP)</label>
+                        <input type="number" id="borrow-manage-amount" required min="0.01" step="0.01" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Interest (%)</label>
+                        <input type="number" id="borrow-manage-interest" placeholder="0" min="0" step="0.1" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Installment (mo)</label>
+                        <input type="number" id="borrow-manage-installment" placeholder="0" min="0" step="1" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Due Date</label>
+                        <input type="date" id="borrow-manage-due-date" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Total w/ Interest</label>
+                        <input type="number" id="borrow-manage-paid" required min="0" step="0.01" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div class="flex items-end lg:col-span-7">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm">Save Edit</button>
+                    </div>
+                </form>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Edit Modal -->
+    <div id="expense-edit-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="expense-edit-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-2xl w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-red-500"></div>
+                <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800">Edit Expense</h3>
+                    </div>
+                    <button id="expense-edit-close" type="button" class="modal-close-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="expense-manage-edit-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Name of Expense</label>
+                        <input type="text" id="expense-manage-name" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Category</label>
+                        <select id="expense-manage-category" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="Store Grocery">Store Grocery</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Repair and Maintenance">Repair and Maintenance</option>
+                            <option value="Beverages">Beverages</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                        <input type="date" id="expense-manage-date" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount (₱)</label>
+                        <input type="number" id="expense-manage-amount" required min="0.01" step="0.01" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div class="md:col-span-2 flex items-end">
+                        <button type="submit" class="w-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm">Save Changes</button>
+                    </div>
+                </form>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Edit Modal -->
+    <div id="sales-edit-modal" class="fixed inset-0 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div id="sales-edit-backdrop" class="fixed inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm"></div>
+            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-2xl w-full animate-fade-in border border-slate-100 modal-panel">
+                <div class="h-0.5 bg-emerald-500"></div>
+                <div class="p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-800">Edit Sales Record</h3>
+                    </div>
+                    <button id="sales-edit-close" type="button" class="modal-close-btn" title="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form id="sales-manage-edit-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Sales (₱)</label>
+                        <input type="number" id="sales-manage-amount" required min="0.01" step="0.01" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Status</label>
+                        <select id="sales-manage-status" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                        <input type="date" id="sales-manage-date" required class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm">Save Changes</button>
+                    </div>
+                </form>
+                </div><!-- /p-6 -->
+            </div>
+        </div>
+    </div>
+
+    <div id="app">
+
+        <!-- ══ HEADER ══════════════════════════════════════════════════ -->
+        <header id="app-header" class="bg-slate-950 text-white">
+            <div class="container mx-auto px-4 py-5 md:py-6">
+                <div class="flex flex-col gap-4">
+
+                    <!-- Brand & Language -->
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-xl select-none shrink-0">🚕</div>
+                            <div>
+                                <h1 class="text-base md:text-lg font-bold tracking-tight leading-tight" data-i18n="app_title">Rent Money &amp; Sari-Sari Store</h1>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span id="sync-status-dot" class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    <span id="sync-status" class="text-xs text-slate-400 font-medium">Sync idle</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <label for="app-header-theme-select" class="text-xs text-slate-400 font-medium hidden sm:block" data-i18n="theme_label">Theme</label>
+                            <select id="app-header-theme-select" class="px-2.5 py-1.5 text-xs font-semibold text-slate-900 bg-white rounded-lg border-0 shadow-sm cursor-pointer focus:outline-none">
+                                <option value="light" data-i18n="theme_light">Light</option>
+                                <option value="night" data-i18n="theme_night">Night</option>
+                            </select>
+                            <label for="app-language-select" class="text-xs text-slate-400 font-medium hidden sm:block" data-i18n="language_label">Language</label>
+                            <select id="app-language-select" class="px-2.5 py-1.5 text-xs font-semibold text-slate-900 bg-white rounded-lg border-0 shadow-sm cursor-pointer focus:outline-none">
+                                <option value="en" data-i18n="lang_english">English</option>
+                                <option value="bis" data-i18n="lang_bisaya">Bisaya</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+
+                        <!-- Taxi Rent -->
+                        <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 flex items-center gap-3 hover:bg-white/10 transition-colors cursor-default">
+                            <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div id="summary-rent" class="text-base font-bold tabular-nums truncate">₱0.00</div>
+                                <div class="text-xs text-slate-400 font-medium" data-i18n="summary_taxi">Taxi Rent</div>
+                            </div>
+                        </div>
+
+                        <!-- Room Rent -->
+                        <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 flex items-center gap-3 hover:bg-white/10 transition-colors cursor-default">
+                            <div class="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div id="summary-room" class="text-base font-bold tabular-nums truncate">₱0.00</div>
+                                <div class="text-xs text-slate-400 font-medium" data-i18n="summary_room">Room Rent</div>
+                            </div>
+                        </div>
+
+                        <!-- Owed to You -->
+                        <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 flex items-center gap-3 hover:bg-white/10 transition-colors cursor-default">
+                            <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div id="summary-borrow" class="text-base font-bold tabular-nums truncate">₱0.00</div>
+                                <div class="text-xs text-slate-400 font-medium" data-i18n="summary_borrow">Owed to You</div>
+                            </div>
+                        </div>
+
+                        <!-- Store Profit -->
+                        <div class="bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 flex items-center gap-3 hover:bg-white/10 transition-colors cursor-default">
+                            <div class="w-8 h-8 bg-violet-500/20 rounded-lg flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div id="summary-store" class="text-base font-bold tabular-nums truncate">₱0.00</div>
+                                <div class="text-xs text-slate-400 font-medium" data-i18n="summary_store">Store Profit</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ══ TAB NAVIGATION ══════════════════════════════════════════ -->
+        <div class="bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="container mx-auto px-4">
+                <div class="flex overflow-x-auto scrollbar-none" style="scrollbar-width:none">
+                    <button onclick="showTab('taxi')" id="taxi-tab" class="tab-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                        </svg>
+                        <span data-i18n="tab_taxi">Taxi Rent</span>
+                    </button>
+                    <button onclick="showTab('room')" id="room-tab" class="tab-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <span data-i18n="tab_room">Room for Rent</span>
+                    </button>
+                    <button onclick="showTab('borrow')" id="borrow-tab" class="tab-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <span data-i18n="tab_borrow">Borrow / Owe Me</span>
+                    </button>
+                    <button onclick="showTab('store')" id="store-tab" class="tab-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        <span data-i18n="tab_store">Sari-Sari Store</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MAIN CONTENT ════════════════════════════════════════════ -->
+        <div class="container mx-auto px-4 py-6">
+
+            <!-- ─── TAXI RENT SECTION ──────────────────────────────────────── -->
+            <div id="taxi-section" class="space-y-5">
+
+                <!-- Form Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-blue-500 to-indigo-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800">Add Taxi Rent</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Record taxi driver rent payment and kulang</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <form id="taxi-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Taxi No. / Plate</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="taxi-item" required placeholder="e.g., Taxi 001"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Driver Name</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="taxi-renter" required placeholder="Who is driving?"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                                <input type="date" id="taxi-date" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Rent Amount (PHP)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="number" id="taxi-amount" required placeholder="0.00" min="0" step="0.01"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Billing Cycle</label>
+                                <select id="taxi-period" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit"
+                                    id="taxi-submit-btn"
+                                    class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Add Record
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Records Table Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-blue-500 to-indigo-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-slate-800">Taxi Rent Records</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="taxi-export-pdf" type="button"
+                                class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200">
+                                Export PDF
+                            </button>
+                            <button id="taxi-edit-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Edit Selected
+                            </button>
+                            <button id="taxi-delete-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Delete Selected
+                            </button>
+                            <span id="taxi-total" class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Total: PHP 0.00</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <input type="checkbox" id="taxi-select-all" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Taxi No.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Driver</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cycle</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Rent</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Paid</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Kulang</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="taxi-table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                    <div id="taxi-empty" class="hidden py-16 text-center">
+                        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <span class="text-3xl select-none">🚕</span>
+                        </div>
+                        <p class="text-slate-700 font-semibold text-sm">No taxi rent records yet</p>
+                        <p class="text-slate-400 text-xs mt-1">Add a record when a driver pays you</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="h-0.5 bg-indigo-500"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+                        <h2 class="text-sm font-semibold text-slate-800" data-i18n="driver_summary">Driver Summary</h2>
+                        <div class="flex items-center gap-2">
+                            <select id="taxi-summary-renter"
+                                class="min-w-[220px] px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50">
+                                <option value="">Select driver</option>
+                            </select>
+                            <button id="taxi-summary-export-pdf" type="button"
+                                class="px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200">
+                                Export PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Rent This Week</div>
+                                <div id="taxi-summary-total-rent" class="text-lg font-bold text-blue-700">PHP 0.00</div>
+                            </div>
+                            <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Overall Paid</div>
+                                <div id="taxi-summary-total-paid" class="text-lg font-bold text-emerald-700">PHP 0.00</div>
+                            </div>
+                            <div class="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Remaining Balance</div>
+                                <div id="taxi-summary-total-kulang" class="text-lg font-bold text-amber-700">PHP 0.00</div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Taxi No.</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cycle</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Payment</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Note</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="taxi-summary-history" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <p id="taxi-summary-empty" class="text-sm text-slate-500">Select a driver to view payment history.</p>
+                    </div>
+                </div>
+            </div><!-- /taxi-section -->
+
+            <!-- ─── RENT SECTION ──────────────────────────────────────── -->
+            <div id="room-section" class="space-y-5">
+
+                <!-- Form Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-blue-500 to-indigo-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800">Add Room for Rent</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Record rent amount, payment, and kulang</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <form id="room-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Room Name / No.</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="room-item" required placeholder="e.g., Room 1"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Renter Name</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="room-renter" required placeholder="Who is renting this room?"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                                <input type="date" id="room-date" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Rent Amount (PHP)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="number" id="room-amount" required placeholder="0.00" min="0" step="0.01"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount Paid (PHP)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <input type="number" id="room-paid" required placeholder="0.00" min="0" step="0.01"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Billing Cycle</label>
+                                <select id="room-period" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit"
+                                    id="room-submit-btn"
+                                    class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Add Record
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Records Table Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-blue-500 to-indigo-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-slate-800">Room Rent Records</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="room-export-pdf" type="button"
+                                class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200">
+                                Export PDF
+                            </button>
+                            <button id="room-edit-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Edit Selected
+                            </button>
+                            <button id="room-delete-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Delete Selected
+                            </button>
+                            <span id="room-total" class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Total: PHP 0.00</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <input type="checkbox" id="room-select-all" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Room</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Renter</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cycle</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Rent</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Paid</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Kulang</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="room-table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                    <div id="room-empty" class="hidden py-16 text-center">
+                        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <span class="text-3xl select-none">🚕</span>
+                        </div>
+                        <p class="text-slate-700 font-semibold text-sm">No room rent records yet</p>
+                        <p class="text-slate-400 text-xs mt-1">Add a record when a renter pays you</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="h-0.5 bg-indigo-500"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+                        <h2 class="text-sm font-semibold text-slate-800" data-i18n="renter_summary">Renter Summary</h2>
+                        <div class="flex items-center gap-2">
+                            <select id="room-summary-renter"
+                                class="min-w-[220px] px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-slate-50">
+                                <option value="">Select renter</option>
+                            </select>
+                            <button id="room-summary-export-pdf" type="button"
+                                class="px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200">
+                                Export PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Abang This Week</div>
+                                <div id="room-summary-total-rent" class="text-lg font-bold text-blue-700">PHP 0.00</div>
+                            </div>
+                            <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Overall Paid</div>
+                                <div id="room-summary-total-paid" class="text-lg font-bold text-emerald-700">PHP 0.00</div>
+                            </div>
+                            <div class="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Remaining Balance</div>
+                                <div id="room-summary-total-kulang" class="text-lg font-bold text-amber-700">PHP 0.00</div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Room</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Cycle</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Payment</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Note</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="room-summary-history" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <p id="room-summary-empty" class="text-sm text-slate-500">Select a renter to view payment history.</p>
+                    </div>
+                </div>
+            </div><!-- /room-section -->
+
+            <!-- ─── BORROW SECTION ─────────────────────────────────────── -->
+            <div id="borrow-section" class="space-y-5 hidden">
+
+                <!-- Form Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800">Record Money Owed to You</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Track who borrowed money from you</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <form id="borrow-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Name</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="borrow-borrower" required placeholder="Who owes you money?"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date Lent</label>
+                                <input type="date" id="borrow-date" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount (₱)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="number" id="borrow-amount" required placeholder="0.00" min="0" step="0.01"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Interest Rate (%) <span class="normal-case font-normal text-slate-400">(optional)</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="number" id="borrow-interest-rate" placeholder="10" min="0" max="100" step="0.1"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Installment (Months) <span class="normal-case font-normal text-slate-400">(optional)</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="number" id="borrow-installment-months" placeholder="3" min="1" max="60"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Due Date <span class="normal-case font-normal text-slate-400">(optional)</span></label>
+                                <input type="date" id="borrow-due-date"
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit"
+                                    id="borrow-submit-btn"
+                                    class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Add Record
+                                </button>
+                            </div>
+                        </form>
+                        <div id="borrow-preview"></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-slate-800">Money Owed to You</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="borrow-export-pdf" type="button"
+                                class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200">
+                                Export PDF
+                            </button>
+                            <button id="borrow-edit-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Edit Selected
+                            </button>
+                            <button id="borrow-delete-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Delete Selected
+                            </button>
+                            <span id="borrow-total" class="text-sm font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Total: ₱0.00</span>
+                            <span id="borrow-pending" class="text-sm font-semibold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100">Owed: ₱0.00</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <input type="checkbox" id="borrow-select-all" class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date Lent</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Due Date</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Interest</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Monthly</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Remaining</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="borrow-table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                    <div id="borrow-empty" class="hidden py-16 text-center">
+                        <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <span class="text-3xl select-none">🤝</span>
+                        </div>
+                        <p class="text-slate-700 font-semibold text-sm">No records yet</p>
+                        <p class="text-slate-400 text-xs mt-1">Track money that others owe you</p>
+                    </div>
+                </div>
+
+                <!-- Borrower Summary Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="h-0.5 bg-teal-500"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+                        <h2 class="text-sm font-semibold text-slate-800">Borrower Summary</h2>
+                        <div class="flex items-center gap-2">
+                            <select id="borrow-summary-borrower"
+                                class="min-w-[220px] px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-slate-50">
+                                <option value="">Select borrower</option>
+                            </select>
+                            <button id="borrow-summary-export-pdf" type="button"
+                                class="px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200">
+                                Export PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div class="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Original Amount</div>
+                                <div id="borrow-summary-total-borrowed" class="text-lg font-bold text-slate-700">₱0.00</div>
+                            </div>
+                            <div class="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total with Interest</div>
+                                <div id="borrow-summary-total-interest" class="text-lg font-bold text-amber-700">₱0.00</div>
+                            </div>
+                            <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Total Paid</div>
+                                <div id="borrow-summary-total-paid" class="text-lg font-bold text-emerald-700">₱0.00</div>
+                            </div>
+                            <div class="rounded-xl border border-red-100 bg-red-50 px-4 py-3">
+                                <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Remaining Balance</div>
+                                <div id="borrow-summary-remaining" class="text-lg font-bold text-red-700">₱0.00</div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Payment</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="borrow-summary-history" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <p id="borrow-summary-empty" class="text-sm text-slate-500">Select a borrower to view payment history.</p>
+                    </div>
+                </div>
+            </div><!-- /borrow-section -->
+
+            <!-- ─── STORE SECTION ──────────────────────────────────────── -->
+            <div id="store-section" class="space-y-5 hidden">
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 store-stat-daily card-lift">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Today's Sales</p>
+                                <p id="store-daily-sales" class="text-2xl font-bold text-emerald-600 tabular-nums">₱0.00</p>
+                            </div>
+                            <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">Daily revenue</p>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 store-stat-weekly card-lift">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">This Week</p>
+                                <p id="store-weekly-sales" class="text-2xl font-bold text-blue-600 tabular-nums">₱0.00</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">Weekly revenue</p>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 store-stat-monthly card-lift">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">This Month</p>
+                                <p id="store-monthly-sales" class="text-2xl font-bold text-violet-600 tabular-nums">₱0.00</p>
+                            </div>
+                            <div class="w-12 h-12 bg-violet-100 rounded-2xl flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">Monthly revenue</p>
+                    </div>
+                </div>
+
+                <!-- Add Expense Form Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-red-500 to-orange-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800">Add Expense</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Record store expenses</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <form id="expense-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Name of Expense</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="expense-name" required placeholder="e.g., Rice, Sugar, Water Bill"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Category</label>
+                                <select id="expense-category" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                                    <option value="Store Grocery">Store Grocery</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Repair and Maintenance">Repair and Maintenance</option>
+                                    <option value="Beverages">Beverages</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                                <input type="date" id="expense-date" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Amount (₱)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="number" id="expense-amount" required placeholder="0.00" min="0" step="0.01"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit"
+                                    class="w-full bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Add Expense
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Expenses Table Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-red-500 to-orange-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-slate-800">Expense Records</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="expense-export-pdf" type="button"
+                                class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200">
+                                Export PDF
+                            </button>
+                            <button id="expense-edit-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Edit Selected
+                            </button>
+                            <button id="expense-delete-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Delete Selected
+                            </button>
+                            <span id="expense-total" class="text-sm font-semibold text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">Total Expenses: ₱0.00</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <input type="checkbox" id="expense-select-all" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500">
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expense-table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                    <div id="expense-empty" class="hidden py-16 text-center">
+                        <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <span class="text-3xl select-none">💸</span>
+                        </div>
+                        <p class="text-slate-700 font-semibold text-sm">No expense records yet</p>
+                        <p class="text-slate-400 text-xs mt-1">Add your store expenses</p>
+                    </div>
+                </div>
+
+                <!-- Add Sales Form Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800">Add Sales</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Record store sales</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <form id="sales-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Sales (₱)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                        </svg>
+                                    </div>
+                                    <input type="number" id="sales-amount" required placeholder="0.00" min="0" step="0.01"
+                                        class="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder-slate-400 bg-slate-50 focus:bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Status</label>
+                                <select id="sales-status" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                                    <option value="Daily">Daily</option>
+                                    <option value="Weekly">Weekly</option>
+                                    <option value="Monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                                <input type="date" id="sales-date" required
+                                    class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 focus:bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">&nbsp;</label>
+                                <div class="h-[42px]"></div>
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit"
+                                    class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Add Sales
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Sales Table Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <h2 class="text-sm font-semibold text-slate-800">Sales Records</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="sales-export-pdf" type="button"
+                                class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200">
+                                Export PDF
+                            </button>
+                            <button id="sales-edit-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Edit Selected
+                            </button>
+                            <button id="sales-delete-selected" type="button" disabled
+                                class="px-3 py-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                                Delete Selected
+                            </button>
+                            <span id="sales-total" class="text-sm font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Total Sales: ₱0.00</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <input type="checkbox" id="sales-select-all" class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Sales</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                    <div id="sales-empty" class="hidden py-16 text-center">
+                        <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                            <span class="text-3xl select-none">💰</span>
+                        </div>
+                        <p class="text-slate-700 font-semibold text-sm">No sales records yet</p>
+                        <p class="text-slate-400 text-xs mt-1">Add your store sales</p>
+                    </div>
+                </div>
+            </div><!-- /store-section -->
+
+        </div><!-- /container -->
+
+        <!-- Footer -->
+        <footer class="mt-10 border-t border-slate-200 bg-white">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base select-none">🚕</span>
+                        <span class="text-xs font-semibold text-slate-500">Rent Money &amp; Sari-Sari Store</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-slate-400">
+                        <span class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Saved locally
+                        </span>
+                        <span class="text-slate-300">·</span>
+                        <span class="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            Private &amp; Offline
+                        </span>
+                        <span class="text-slate-300">·</span>
+                        <span>v1.0</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div><!-- /app -->
+
+    
+</body>
+</html>
+
+
